@@ -1,6 +1,9 @@
 
 const inquirer = require('inquirer');
-const mysql = require('mysql2');
+const Crud_read = require('./CRUD/read');
+const Crud_create = require('./CRUD/create');
+const Crud_update = require('./CRUD/update');
+const Crud_delete = require('./CRUD/delete'); 
 // metodo para dar las prenguntas en la consola
 inquirer.prompt([{
     type: "list",
@@ -10,30 +13,7 @@ inquirer.prompt([{
 }]).then(answers => {
     console.log('answers: ', answers);
     if (answers.tarea == "read") {
-        const connection = mysql.createConnection({
-            host: 'localhost',
-            database: 'db_productos_libreria',
-            user: 'root',
-            password: 'root'
-        });
-        //-------------------READ*****************devolver todos los registros de la tabla productosdelibreria*******************
-        connection.connect((error) => {
-            if (error) {
-                throw error;
-            } else {
-                console.log("Conexion exitosa!!!!!");
-                connection.query('select * from db_productos_libreria.productosdelbreria', (error, results, fields) => {
-                    if (error) {
-                        throw error
-                    } else {
-                        return console.log(results);
-                    }
-
-                })
-
-            }
-            connection.end();
-        });
+        Crud_read();
     } else if (answers.tarea == "create") {
         /******** *******metodo para crear un nuevo registro en la base de datos ***************************************************/
         inquirer.prompt([{
@@ -54,30 +34,7 @@ inquirer.prompt([{
             message: "Stock del producto( True o false )?",
         }]).then(answers => {
             console.log("producto: ", answers,);
-            const connection = mysql.createConnection({
-                host: 'localhost',
-                database: 'db_productos_libreria',
-                user: 'root',
-                password: 'root'
-            });
-
-            connection.connect((error) => {
-                if (error) {
-                    throw error;
-                } else {
-                    console.log("Conexion exitosa!!!!!");
-                    connection.query(`insert db_productos_libreria.productosdelbreria value(${Number(answers.idProducto)},${answers.nombreProducto},${answers.descripcionProducto},${Number(answers.precioProducto)},${false})`, (error, results, fields) => {
-                        if (error) {
-                            throw error
-                        } else {
-                            return console.log(results);
-                        }
-
-                    })
-
-                }
-                connection.end();
-            });
+            Crud_create(Number(answers.idProducto),answers.nombreProducto,answers.descripcionProducto,Number(answers.precioProducto),false)
         });
     } else if (answers.tarea == "update") {
         /********************Metodo para editar un registro de la base de datos******************************************* */
@@ -98,28 +55,7 @@ inquirer.prompt([{
             message: "Stock del producto( True o false )?",
         }]).then(answers => {
             console.log("producto: ", answers,);
-            const connection = mysql.createConnection({
-                host: 'localhost',
-                database: 'db_productos_libreria',
-                user: 'root',
-                password: 'root'
-            });
-
-            connection.connect((error) => {
-                if (error) {
-                    throw error;
-                } else {
-                    console.log("Conexion exitosa!!!!!");
-                    connection.query(`UPDATE db_productos_libreria.productosdelbreria SET producto=${answers.nombreProducto} ,descripcion =${answers.descripcionProducto},precio=${Number(answers.precioProducto)},stock = ${false} WHERE id = ${Number(answers.idProducto)};`, (error, results, fields) => {
-                        if (error) {
-                            throw error
-                        } else {
-                            return console.log(results);
-                        }
-                    })
-                }
-                connection.end();
-            });
+            Crud_update(Number(answers.idProducto),answers.nombreProducto,answers.descripcionProducto,Number(answers.precioProducto),false)
         });
     } else if (answers.tarea == "delete") {
         /****************************Metodo para eliminar un Registro de la base de datos *****************************************/
@@ -133,31 +69,7 @@ inquirer.prompt([{
         }]).then(answers => {
             console.log("producto: ", answers,);
             if (answers.confirmar.toLowerCase() == "si".toLowerCase()) {
-                const connection = mysql.createConnection({
-                    host: 'localhost',
-                    database: 'db_productos_libreria',
-                    user: 'root',
-                    password: 'root'
-                });
-
-                connection.connect((error) => {
-                    if (error) {
-                        throw error;
-                    } else {
-                        console.log("Conexion exitosa!!!!!");
-                        connection.query(`DELETE FROM db_productos_libreria.productosdelbreria WHERE id = ${answers.idProducto} ;`, (error, results, fields) => {
-                            if (error) {
-                                throw error
-                            } else {
-                                return console.log(results);
-                            }
-
-                        })
-
-                    }
-                    connection.end();
-                });
-
+               Crud_delete(answers.idProducto);
                 console.log("El producto se ha eliminado con exito");
             }
 
@@ -166,7 +78,9 @@ inquirer.prompt([{
 }).catch((error) => {
     if (error.isTtyError) {
         // Prompt couldn't be rendered in the current environment
+        console.log("Message: Prompt couldn't be rendered in the current environment");
     } else {
+        console.log("Message: Error 504, couldn't be conected with the server");
         // Something else went wrong
     }
 });
